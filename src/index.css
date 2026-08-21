@@ -1,0 +1,122 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html { scroll-behavior: smooth; }
+
+/* ============ THEME VARIABLES ============ */
+/* Default "coffee" theme (espresso browns + gold). This is the default for
+   BOTH the guest storefront and the logged-in user/admin account, so the
+   whole app looks consistent everywhere until someone flips the toggle. */
+:root {
+  --c-50: 247 241 236;
+  --c-100: 236 223 211;
+  --c-200: 216 191 166;
+  --c-300: 195 157 120;
+  --c-400: 169 122 81;
+  --c-500: 138 92 58;
+  --c-600: 111 78 55;
+  --c-700: 74 44 29;
+  --c-800: 58 33 21;
+  --c-900: 44 24 16;
+  --c-950: 26 14 8;
+
+  --cream: 247 239 228;
+  --cream-light: 255 250 243;
+  --cream-dark: 237 224 205;
+
+  --accent: 201 166 107;
+  --accent-dark: 169 129 74;
+  --accent-light: 227 198 143;
+}
+
+/* "blue" theme, applied to <html data-theme="blue">. Cool, light, modern. */
+[data-theme='blue'] {
+  --c-50: 238 244 251;
+  --c-100: 219 233 247;
+  --c-200: 184 211 239;
+  --c-300: 143 185 227;
+  --c-400: 95 151 209;
+  --c-500: 61 120 189;
+  --c-600: 47 95 156;
+  --c-700: 36 72 122;
+  --c-800: 28 55 96;
+  --c-900: 20 39 74;
+  --c-950: 12 24 48;
+
+  --cream: 238 244 251;
+  --cream-light: 247 251 255;
+  --cream-dark: 219 233 247;
+
+  --accent: 125 211 252;
+  --accent-dark: 56 189 248;
+  --accent-light: 186 230 253;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: rgb(var(--cream));
+  color: rgb(var(--c-900));
+  transition: background-color .3s ease, color .3s ease;
+}
+
+h1, h2, h3, .font-display {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: rgb(var(--cream-dark)); }
+::-webkit-scrollbar-thumb { background: rgb(var(--c-600)); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: rgb(var(--c-700)); }
+
+.container-app {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+.btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-full font-semibold transition-all duration-200 select-none disabled:opacity-50 disabled:cursor-not-allowed;
+}
+.btn-primary {
+  @apply btn bg-espresso-900 text-cream-light px-5 py-2.5 hover:bg-espresso-800 shadow-soft hover:shadow-glow;
+}
+.btn-gold {
+  @apply btn bg-gold text-espresso-900 px-5 py-2.5 hover:bg-gold-dark shadow-soft;
+}
+.btn-outline {
+  @apply btn border-2 border-espresso-900 text-espresso-900 px-5 py-2.5 hover:bg-espresso-900 hover:text-cream-light;
+}
+.btn-ghost {
+  @apply btn text-espresso-900 hover:bg-espresso-900/10 px-4 py-2;
+}
+.btn-danger {
+  @apply btn bg-red-700 text-white px-4 py-2 hover:bg-red-800;
+}
+
+.card {
+  @apply bg-white rounded-2xl shadow-soft border border-espresso-100;
+}
+
+.input {
+  @apply w-full rounded-xl border border-espresso-200 bg-white px-4 py-2.5 outline-none focus:ring-2 focus:ring-gold focus:border-gold transition placeholder:text-espresso-300;
+}
+.label {
+  @apply block text-sm font-semibold text-espresso-800 mb-1.5;
+}
+
+.badge {
+  @apply inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold;
+}
+
+.section-title {
+  @apply font-display text-3xl sm:text-4xl font-extrabold text-espresso-900;
+}
+
+.animate-fadeUp { animation: fadeUp .6s ease forwards; }
+
+/* Reusable "beautiful" pagination pill button */
+.page-btn {
+  @apply w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-colors border border-espresso-100 text-espresso-600 hover:bg-espresso-100 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent;
+}
+.page-btn-active {
+  @apply page-btn !bg-espresso-900 !text-cream-light !border-espresso-900;
+}
