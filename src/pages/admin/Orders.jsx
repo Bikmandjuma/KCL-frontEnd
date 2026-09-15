@@ -7,12 +7,13 @@ import Modal from '../../components/admin/Modal'
 import Pagination from '../../components/Pagination'
 import { formatRWF, formatDate } from '../../utils/format'
 
-const statuses = ['Not Processed', 'Awaiting Proof', 'Cash on Delivery', 'Processing', 'Dispatched', 'Delivered', 'Cancelled']
+// This storefront only creates machine orders, which the backend always
+// treats as `orderType: 'delivery'` - see backend/utils/orderStages.js.
+const statuses = ['Order Placed', 'Pending', 'Confirmed', 'Dispatched', 'Delivered', 'Cancelled']
 const statusColors = {
-  'Not Processed': 'bg-espresso-100 text-espresso-700',
-  'Awaiting Proof': 'bg-yellow-100 text-yellow-800',
-  'Cash on Delivery': 'bg-blue-100 text-blue-800',
-  'Processing': 'bg-indigo-100 text-indigo-800',
+  'Order Placed': 'bg-espresso-100 text-espresso-700',
+  'Pending': 'bg-yellow-100 text-yellow-800',
+  'Confirmed': 'bg-blue-100 text-blue-800',
   'Dispatched': 'bg-purple-100 text-purple-800',
   'Delivered': 'bg-green-100 text-green-800',
   'Cancelled': 'bg-red-100 text-red-800',
@@ -86,7 +87,7 @@ export default function AdminOrders() {
               <tbody>
                 {orders.items.map((o) => (
                   <tr key={o._id} className="border-t border-espresso-100 hover:bg-espresso-50/50">
-                    <td className="px-4 py-3 font-mono text-xs">{o.paymentIntent?.id}</td>
+                    <td className="px-4 py-3 font-mono text-xs">{o.orderCode}</td>
                     <td className="px-4 py-3">
                       <p className="font-semibold text-espresso-800">{o.orderby?.username}</p>
                       <p className="text-xs text-espresso-400">{o.contact}</p>

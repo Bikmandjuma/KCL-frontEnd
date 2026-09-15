@@ -8,8 +8,13 @@ import Pagination from '../../components/Pagination'
 import CategoryDropdown from '../../components/CategoryDropdown'
 import { formatRWF } from '../../utils/format'
 
-const emptyForm = { name: '', price: '', category: 'Hot Drinks', desc: '', available: true }
+const emptyForm = { name: '', price: '', type: 'coffee', category: 'Hot Drinks', desc: '', available: true }
 const drinkCategories = ['Hot Drinks', 'Cold Drinks', 'Specialty']
+const foodCategories = ['Pastries', 'Sandwiches']
+const drinkTypes = [
+  { id: 'coffee', label: 'Coffee' },
+  { id: 'food', label: 'Food' },
+]
 
 export default function AdminDrinks() {
   const [drinks, setDrinks] = useState({ items: [], total: 0, page: 1, pages: 1 })
@@ -39,7 +44,7 @@ export default function AdminDrinks() {
   const openCreate = () => { setEditing(null); setForm(emptyForm); setFile(null); setModalOpen(true) }
   const openEdit = (d) => {
     setEditing(d)
-    setForm({ name: d.name, price: d.price, category: d.category, desc: d.desc || '', available: d.available })
+    setForm({ name: d.name, price: d.price, type: d.type || 'coffee', category: d.category, desc: d.desc || '', available: d.available })
     setFile(null); setModalOpen(true)
   }
 
@@ -90,7 +95,7 @@ export default function AdminDrinks() {
           <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-espresso-300" />
           <input className="input !pl-10" placeholder="Search drinks..." value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
-        <CategoryDropdown value={category} onChange={setCategory} options={drinkCategories} className="sm:w-56" allLabel="All categories" />
+        <CategoryDropdown value={category} onChange={setCategory} options={[...drinkCategories, ...foodCategories]} className="sm:w-56" allLabel="All categories" />
       </div>
 
       {loading ? <Loader /> : (
@@ -135,9 +140,23 @@ export default function AdminDrinks() {
             <input type="number" required className="input" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
           </div>
           <div>
+            <label className="label">Type</label>
+            <select
+              className="input"
+              value={form.type}
+              onChange={(e) => {
+                const type = e.target.value
+                const firstCategory = type === 'food' ? foodCategories[0] : drinkCategories[0]
+                setForm({ ...form, type, category: firstCategory })
+              }}
+            >
+              {drinkTypes.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
+            </select>
+          </div>
+          <div>
             <label className="label">Category</label>
             <select className="input" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
-              {drinkCategories.map((c) => <option key={c}>{c}</option>)}
+              {(form.type === 'food' ? foodCategories : drinkCategories).map((c) => <option key={c}>{c}</option>)}
             </select>
           </div>
           <div>

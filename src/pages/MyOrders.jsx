@@ -5,11 +5,12 @@ import api, { fileUrl } from '../api/axios'
 import { formatRWF, formatDate } from '../utils/format'
 import Loader from '../components/Loader'
 
+// This storefront only creates machine orders, which the backend always
+// treats as `orderType: 'delivery'` - see backend/utils/orderStages.js.
 const statusColors = {
-  'Not Processed': 'bg-espresso-100 text-espresso-700',
-  'Awaiting Proof': 'bg-yellow-100 text-yellow-800',
-  'Cash on Delivery': 'bg-blue-100 text-blue-800',
-  'Processing': 'bg-indigo-100 text-indigo-800',
+  'Order Placed': 'bg-espresso-100 text-espresso-700',
+  'Pending': 'bg-yellow-100 text-yellow-800',
+  'Confirmed': 'bg-blue-100 text-blue-800',
   'Dispatched': 'bg-purple-100 text-purple-800',
   'Delivered': 'bg-green-100 text-green-800',
   'Cancelled': 'bg-red-100 text-red-800',
@@ -70,7 +71,7 @@ export default function MyOrders() {
               <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
                 <div>
                   <p className="text-xs text-espresso-400 flex items-center gap-1"><Clock size={12}/> {formatDate(o.createdAt)}</p>
-                  <p className="font-mono text-sm text-espresso-500">#{o.paymentIntent?.id}</p>
+                  <p className="font-mono text-sm text-espresso-500">#{o.orderCode}</p>
                 </div>
                 <span className={`badge ${statusColors[o.orderStatus] || 'bg-espresso-100 text-espresso-700'}`}>{o.orderStatus}</span>
               </div>
@@ -90,7 +91,7 @@ export default function MyOrders() {
               <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-espresso-100">
                 <p className="font-extrabold text-espresso-900">{formatRWF(o.paymentIntent?.amount)}</p>
                 <div className="flex gap-2 items-center">
-                  {['Awaiting Proof'].includes(o.orderStatus) && !o.proofOfPayment && (
+                  {['MoMo Pay', 'MoMo Code'].includes(o.paymentMethod) && !o.proofOfPayment && !['Delivered', 'Cancelled'].includes(o.orderStatus) && (
                     <label className="btn-outline !py-2 !px-3 text-xs cursor-pointer">
                       <Upload size={14} /> Upload Proof
                       <input type="file" accept="image/*" className="hidden" onChange={(e) => uploadProof(o._id, e.target.files[0])} />
@@ -101,7 +102,7 @@ export default function MyOrders() {
                       View uploaded proof
                     </a>
                   )}
-                  {!['Dispatched','Delivered','Cancelled'].includes(o.orderStatus) && (
+                  {o.orderStatus === 'Order Placed' && (
                     <button onClick={() => cancelOrder(o._id)} className="btn-ghost !text-red-600 !py-2 !px-3 text-xs">
                       <XCircle size={14} /> Cancel
                     </button>

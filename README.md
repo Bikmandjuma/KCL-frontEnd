@@ -10,9 +10,10 @@ npm install
 npm run dev      # http://localhost:5173
 ```
 
-The dev server proxies `/api` and `/uploads` to `http://localhost:5050` (the backend),
-see `vite.config.js`. Make sure the backend is running and seeded (`node seed.js`
-in the backend folder) before you start.
+The dev server proxies `/api` and `/uploads` to `http://localhost:4000` (the backend's
+default port, see `backend/.env_example`), see `vite.config.js`. Make sure the backend
+is running and seeded (`npm run seed` in the backend folder) before you start. If your
+backend runs on a different port, update the proxy `target` in `vite.config.js`.
 
 ## Default logins (from backend seed script)
 
@@ -42,10 +43,10 @@ in the backend folder) before you start.
 - **Manager** only sees the admin sections they've been granted (`viewDashboard`,
   `manageProducts`, `manageDrinks`, `manageOrders`, `manageBarista`, `manageUsers`,
   `manageSettings`).
-- **Guest/Client** shops, adds to wishlist/cart, checks out (COD, manual proof of
-  payment, MTN Mobile Money, or Visa/Card once enabled), uploads payment proof, cancels
-  their own pending orders from My Orders, applies for barista training, and leaves
-  product reviews.
+- **Guest/Client** shops, adds to wishlist/cart, checks out (Cash on Delivery, MoMo
+  Pay, or MoMo Code), uploads payment proof for MoMo orders, cancels their own
+  pending orders from My Orders, applies for barista training, and leaves product
+  reviews.
 
 ## Search and pagination
 
@@ -63,10 +64,11 @@ The choice is remembered across visits.
 
 ## Payments
 
-MTN Mobile Money (with a real MoMo Pay number and merchant code) and Visa/Credit Card
-(Stripe) are fully wired into the Checkout UI, but stay hidden until an Admin turns them
-on from Admin, Settings, Payment Method. Until then, clients use Cash on Delivery or
-"call, pay, then upload proof".
+Cash on Delivery, MoMo Pay, and MoMo Code are the three payment methods the whole
+system supports (matching the backend). An Admin turns each on/off - and sets the
+real MoMo Pay number and merchant code - from Admin, Settings, Payment Method.
+Orders paid by MoMo Pay or MoMo Code prompt the client to upload a screenshot as
+proof of payment right after checkout (or later, from My Orders).
 
 ## Build for production
 

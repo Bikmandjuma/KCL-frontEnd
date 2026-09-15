@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { CreditCard, Smartphone, Truck, CheckCircle2, Save, Lock } from 'lucide-react'
+import { Smartphone, Truck, Hash, Save, Lock } from 'lucide-react'
 import toast from 'react-hot-toast'
 import api from '../../api/axios'
 import Loader from '../../components/Loader'
@@ -95,18 +95,7 @@ export default function AdminSettings() {
                   <p className="text-xs text-espresso-500">Client pays cash when the order arrives.</p>
                 </div>
               </div>
-              <Toggle checked={settings.codEnabled} onChange={(v) => setPayments('codEnabled', v)} />
-            </div>
-
-            <div className="flex items-center justify-between p-4 rounded-xl bg-espresso-50">
-              <div className="flex items-center gap-3">
-                <CheckCircle2 size={20} className="text-espresso-700" />
-                <div>
-                  <p className="font-semibold text-espresso-800">Manual Proof of Payment</p>
-                  <p className="text-xs text-espresso-500">Client calls, pays by bank/cash, then uploads proof.</p>
-                </div>
-              </div>
-              <Toggle checked={settings.manualProofEnabled} onChange={(v) => setPayments('manualProofEnabled', v)} />
+              <Toggle checked={settings.cashEnabled} onChange={(v) => setPayments('cashEnabled', v)} />
             </div>
 
             <div className="p-4 rounded-xl bg-espresso-50 space-y-3">
@@ -114,35 +103,37 @@ export default function AdminSettings() {
                 <div className="flex items-center gap-3">
                   <Smartphone size={20} className="text-espresso-700" />
                   <div>
-                    <p className="font-semibold text-espresso-800">MTN Mobile Money</p>
-                    <p className="text-xs text-espresso-500">Shown to clients only once enabled here.</p>
+                    <p className="font-semibold text-espresso-800">MoMo Pay</p>
+                    <p className="text-xs text-espresso-500">Client sends payment to your MoMo Pay number.</p>
                   </div>
                 </div>
-                <Toggle checked={settings.mtnEnabled} onChange={(v) => setPayments('mtnEnabled', v)} />
+                <Toggle checked={settings.momoPayEnabled} onChange={(v) => setPayments('momoPayEnabled', v)} />
               </div>
-              {settings.mtnEnabled && (
-                <div className="grid sm:grid-cols-2 gap-3 pl-8">
-                  <div>
-                    <label className="label">MTN MoMo Pay Number</label>
-                    <input className="input" value={settings.mtnNumber} onChange={(e) => setSettings({ ...settings, mtnNumber: e.target.value })} />
-                  </div>
-                  <div>
-                    <label className="label">MTN MoMo Pay Code</label>
-                    <input className="input" placeholder="e.g. 123456" value={settings.mtnCode || ''} onChange={(e) => setSettings({ ...settings, mtnCode: e.target.value })} />
-                  </div>
+              {settings.momoPayEnabled && (
+                <div className="pl-8">
+                  <label className="label">MoMo Pay Number</label>
+                  <input className="input" value={settings.momoPayNumber} onChange={(e) => setSettings({ ...settings, momoPayNumber: e.target.value })} />
                 </div>
               )}
             </div>
 
-            <div className="flex items-center justify-between p-4 rounded-xl bg-espresso-50">
-              <div className="flex items-center gap-3">
-                <CreditCard size={20} className="text-espresso-700" />
-                <div>
-                  <p className="font-semibold text-espresso-800">Visa / Credit Card (Stripe)</p>
-                  <p className="text-xs text-espresso-500">Enable once you are ready to accept live card payments.</p>
+            <div className="p-4 rounded-xl bg-espresso-50 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Hash size={20} className="text-espresso-700" />
+                  <div>
+                    <p className="font-semibold text-espresso-800">MoMo Code</p>
+                    <p className="text-xs text-espresso-500">Client pays to your MoMo merchant/till code.</p>
+                  </div>
                 </div>
+                <Toggle checked={settings.momoCodeEnabled} onChange={(v) => setPayments('momoCodeEnabled', v)} />
               </div>
-              <Toggle checked={settings.stripeEnabled} onChange={(v) => setPayments('stripeEnabled', v)} />
+              {settings.momoCodeEnabled && (
+                <div className="pl-8">
+                  <label className="label">MoMo Merchant Code</label>
+                  <input className="input" placeholder="e.g. 123456" value={settings.momoCode || ''} onChange={(e) => setSettings({ ...settings, momoCode: e.target.value })} />
+                </div>
+              )}
             </div>
           </div>
 

@@ -9,9 +9,9 @@ const defaultSettings = {
   phone: '+250 700 000 000',
   whatsapp: '+250 700 000 000',
   address: 'KG 7 Ave, Kigali, Rwanda',
-  mtnNumber: '073 000 0000',
-  mtnCode: '',
-  payments: { stripeEnabled: false, mtnEnabled: false, codEnabled: true, manualProofEnabled: true },
+  momoPayNumber: '073 000 0000',
+  momoCode: '',
+  payments: { cashEnabled: true, momoPayEnabled: true, momoCodeEnabled: true },
 }
 
 export const SettingsProvider = ({ children }) => {

@@ -7,12 +7,14 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:5050',
+        // Matches the KCL backend's default PORT (see backend/.env_example).
+        // If your backend runs on a different port, change this.
+        target: 'http://localhost:4000',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
       '/uploads': {
-        target: 'http://localhost:5050',
+        target: 'http://localhost:4000',
         changeOrigin: true,
       },
     },
