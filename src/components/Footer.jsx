@@ -49,7 +49,7 @@ export default function Footer() {
           <ul className="space-y-3 text-sm text-cream-light/70">
             <li className="flex items-center gap-2"><Phone size={15} className="text-gold" /> {settings.phone}</li>
             <li className="flex items-center gap-2"><MapPin size={15} className="text-gold" /> {settings.address}</li>
-            <li className="flex items-center gap-2"><Mail size={15} className="text-gold" /> hello@kigalicoffeelab.rw</li>
+            <li className="flex items-center gap-2"><Mail size={15} className="text-gold" /> admin@kigalicoffeelab.com</li>
           </ul>
         </div>
       </div>

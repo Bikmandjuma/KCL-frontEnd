@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, X, PackageSearch } from 'lucide-react'
+import { Search, X, PackageSearch, Coffee, Cpu } from 'lucide-react'
 import api, { fileUrl } from '../api/axios'
 import { encodeId } from '../utils/idHash'
 import { formatRWF } from '../utils/format'
@@ -21,16 +21,22 @@ export default function SearchModal({ open, onClose }) {
     if (!q.trim()) { setResults([]); return }
     setLoading(true)
     const t = setTimeout(() => {
-      api.get('/products/search', { params: { q } })
+      // One search box, everything in the database - both coffee machines
+      // and menu (coffee/food) items come back from a single call.
+      api.get('/search', { params: { q } })
         .then((r) => setResults(r.data))
         .finally(() => setLoading(false))
     }, 300)
     return () => clearTimeout(t)
   }, [q])
 
-  const goToProduct = (product) => {
+  const goToResult = (item) => {
     onClose()
-    navigate(`/product/${product.hash || encodeId(product._id)}`)
+    if (item.itemType === 'machine') {
+      navigate(`/product/${item.hash || encodeId(item.id)}`)
+    } else {
+      navigate(item.menuType === 'food' ? '/food' : '/coffee')
+    }
   }
 
   if (!open) return null
@@ -44,7 +50,7 @@ export default function SearchModal({ open, onClose }) {
             ref={inputRef}
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search machines, categories, coffee..."
+            placeholder="Search machines, coffee, food..."
             className="flex-1 outline-none text-espresso-900 placeholder:text-espresso-300 bg-transparent"
           />
           <button onClick={onClose} className="w-8 h-8 rounded-full hover:bg-espresso-50 flex items-center justify-center text-espresso-500 shrink-0">
@@ -60,22 +66,28 @@ export default function SearchModal({ open, onClose }) {
               No matches for &quot;{q}&quot;
             </div>
           )}
-          {!loading && results.map((p) => (
+          {!loading && results.map((item) => (
             <button
-              key={p._id}
-              onClick={() => goToProduct(p)}
+              key={`${item.itemType}-${item.id}`}
+              onClick={() => goToResult(item)}
               className="w-full flex items-center gap-3 px-5 py-3 hover:bg-espresso-50 text-left transition"
             >
-              <img src={fileUrl(p.image)} alt={p.title} className="w-12 h-12 rounded-lg object-cover bg-espresso-50 shrink-0" />
+              {item.image ? (
+                <img src={fileUrl(item.image)} alt={item.name} className="w-12 h-12 rounded-lg object-cover bg-espresso-50 shrink-0" />
+              ) : (
+                <div className="w-12 h-12 rounded-lg bg-espresso-50 flex items-center justify-center text-espresso-300 shrink-0">
+                  {item.itemType === 'machine' ? <Cpu size={20} /> : <Coffee size={20} />}
+                </div>
+              )}
               <div className="min-w-0 flex-1">
-                <p className="font-semibold text-espresso-900 truncate">{p.title}</p>
-                <p className="text-xs text-espresso-400">{p.categories}</p>
+                <p className="font-semibold text-espresso-900 truncate">{item.name}</p>
+                <p className="text-xs text-espresso-400">{item.category}{item.itemType === 'machine' ? ' · Machine' : ''}</p>
               </div>
-              <span className="font-bold text-gold-dark shrink-0">{formatRWF(p.price)}</span>
+              <span className="font-bold text-gold-dark shrink-0">{formatRWF(item.price)}</span>
             </button>
           ))}
           {!loading && !q.trim() && (
-            <p className="text-center text-espresso-300 text-sm py-8">Start typing to search the shop.</p>
+            <p className="text-center text-espresso-300 text-sm py-8">Start typing to search coffee, food, or machines.</p>
           )}
         </div>
       </div>

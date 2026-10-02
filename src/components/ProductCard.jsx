@@ -1,18 +1,17 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Heart, ShoppingCart, PackageX } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { fileUrl } from '../api/axios'
 import { encodeId } from '../utils/idHash'
 import { formatRWF } from '../utils/format'
-import { useAuth } from '../context/AuthContext'
 import { useCart } from '../context/CartContext'
-import api from '../api/axios'
-import toast from 'react-hot-toast'
+import { useWishlist } from '../context/WishlistContext'
 
-export default function ProductCard({ product, wishlist = [], onWishlistChange }) {
-  const { user } = useAuth()
+export default function ProductCard({ product }) {
   const { addToCart } = useCart()
-  const [liked, setLiked] = useState(wishlist.includes(product._id))
+  const { isSaved, toggle } = useWishlist()
+  const navigate = useNavigate()
+  const liked = isSaved(product._id)
   const [busy, setBusy] = useState(false)
   const [imgIndex, setImgIndex] = useState(0)
 
@@ -28,29 +27,22 @@ export default function ProductCard({ product, wishlist = [], onWishlistChange }
     if (images.length <= 1) return
     const t = setInterval(() => {
       setImgIndex((i) => (i + 1) % images.length)
-    }, 1000)
+    }, 3000)
     return () => clearInterval(t)
   }, [images.length])
 
-  const toggleWishlist = async (e) => {
+  const toggleWishlist = (e) => {
     e.preventDefault()
-    if (!user) return toast.error('Sign in to save favourites')
-    setLiked((v) => !v)
-    try {
-      await api.put('/products/wishlist', { productId: product._id })
-      onWishlistChange && onWishlistChange()
-    } catch {
-      setLiked((v) => !v)
-      toast.error('Something went wrong')
-    }
+    toggle(product._id)
   }
 
-  const handleAddToCart = async (e) => {
+  const handleAddToCart = (e) => {
     e.preventDefault()
     if (outOfStock) return
     setBusy(true)
-    await addToCart(product, 1)
+    addToCart({ itemType: 'machine', itemId: product._id, name: product.title, price: product.price, image: product.image }, 1)
     setBusy(false)
+    navigate('/cart')
   }
 
   return (
@@ -80,11 +72,11 @@ export default function ProductCard({ product, wishlist = [], onWishlistChange }
         >
           <Heart size={18} fill={liked ? 'currentColor' : 'none'} />
         </button>
-        {product.categories && (
+        {/* {product.categories && (
           <span className="absolute top-3 left-3 badge bg-espresso-900/85 text-cream-light backdrop-blur">
             {product.categories}
           </span>
-        )}
+        )} */}
         {outOfStock && (
           <div className="absolute inset-0 bg-espresso-950/60 flex items-center justify-center text-cream-light font-bold gap-2">
             <PackageX size={18} /> Out of stock

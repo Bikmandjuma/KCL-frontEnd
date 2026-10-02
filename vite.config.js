@@ -9,12 +9,12 @@ export default defineConfig({
       '/api': {
         // Matches the KCL backend's default PORT (see backend/.env_example).
         // If your backend runs on a different port, change this.
-        target: 'http://localhost:4000',
+        target: 'http://api.kigalicoffeelab.com',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
       '/uploads': {
-        target: 'http://localhost:4000',
+        target: 'http://api.kigalicoffeelab.com',
         changeOrigin: true,
       },
     },

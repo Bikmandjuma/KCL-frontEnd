@@ -1,80 +1,74 @@
-import { createContext, useContext, useEffect, useState, useCallback } from 'react'
-import api from '../api/axios'
+import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import toast from 'react-hot-toast'
-import { useAuth } from './AuthContext'
 
 const CartContext = createContext(null)
+const STORAGE_KEY = 'kcl_cart'
 
+// Guest-first cart: no account needed, matching the mobile app and the
+// backend's guest checkout (POST /orders with an `items` array). Lives in
+// localStorage so it survives a page refresh, but never touches the server
+// until the customer actually places the order.
+//
+// Each line: { key, itemType: 'menu' | 'machine', itemId, name, price, image, qty }
+// `key` = `${itemType}-${itemId}` so a coffee and a machine can never collide
+// even if their raw numeric ids overlap.
 export const CartProvider = ({ children }) => {
-  const { user } = useAuth()
-  const [cart, setCart] = useState({ products: [], total: 0 })
-  const [loading, setLoading] = useState(false)
-
-  const refreshCart = useCallback(async () => {
-    if (!user) { setCart({ products: [], total: 0 }); return }
+  const [cart, setCart] = useState(() => {
     try {
-      const { data } = await api.get('/carts/get-cart')
-      setCart(data.cart || { products: [], total: 0 })
-    } catch (e) { /* silent */ }
-  }, [user])
-
-  useEffect(() => { refreshCart() }, [refreshCart])
-
-  const addToCart = async (product, quantity = 1) => {
-    if (!user) {
-      toast.error('Please sign in to add items to your cart')
-      return false
+      const raw = localStorage.getItem(STORAGE_KEY)
+      return raw ? JSON.parse(raw) : []
+    } catch {
+      return []
     }
-    setLoading(true)
-    try {
-      await api.post('/carts', {
-        productId: product._id,
-        quantity,
-        title: product.title,
-        price: product.price,
-        image: product.image,
-      })
-      await refreshCart()
-      toast.success(`${product.title} added to cart ☕`)
-      return true
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Could not add to cart')
-      return false
-    } finally {
-      setLoading(false)
-    }
-  }
+  })
 
-  const decreaseItem = async (productId, quantity = 1) => {
-    try {
-      await api.post('/carts/decrease-quantity', { productId, quantity })
-      await refreshCart()
-    } catch (err) {
-      toast.error('Could not update cart')
-    }
-  }
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cart))
+  }, [cart])
 
-  const removeItem = async (productId) => {
-    try {
-      await api.post('/carts/remove-cart-item', { productId })
-      await refreshCart()
-      toast('Item removed from cart', { icon: '🗑️' })
-    } catch (err) {
-      toast.error('Could not remove item')
-    }
-  }
+  const addToCart = useCallback((item, qty = 1) => {
+    const itemType = item.itemType || 'machine'
+    const itemId = item.itemId ?? item._id ?? item.id
+    const key = `${itemType}-${itemId}`
+    const name = item.name || item.title
+    setCart((prev) => {
+      const existing = prev.find((i) => i.key === key)
+      if (existing) {
+        return prev.map((i) => (i.key === key ? { ...i, qty: i.qty + qty } : i))
+      }
+      return [...prev, { key, itemType, itemId, name, price: item.price, image: item.image, qty }]
+    })
+    toast.success(`${name} added to cart ☕`)
+    return true
+  }, [])
 
-  const clearCart = async () => {
-    try {
-      await api.put('/carts/empty-cart')
-      await refreshCart()
-    } catch (err) {}
-  }
+  const updateQty = useCallback((key, qty) => {
+    setCart((prev) =>
+      qty <= 0 ? prev.filter((i) => i.key !== key) : prev.map((i) => (i.key === key ? { ...i, qty } : i))
+    )
+  }, [])
 
-  const cartCount = cart.products?.reduce((s, p) => s + p.quantity, 0) || 0
+  const decreaseItem = useCallback((key, by = 1) => {
+    setCart((prev) => {
+      const item = prev.find((i) => i.key === key)
+      if (!item) return prev
+      const newQty = item.qty - by
+      return newQty <= 0 ? prev.filter((i) => i.key !== key) : prev.map((i) => (i.key === key ? { ...i, qty: newQty } : i))
+    })
+  }, [])
+
+  const removeItem = useCallback((key) => {
+    setCart((prev) => prev.filter((i) => i.key !== key))
+    toast('Item removed from cart', { icon: '🗑️' })
+  }, [])
+
+  const clearCart = useCallback(() => setCart([]), [])
+
+  const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0)
+  const cartCount = cart.reduce((s, i) => s + i.qty, 0)
 
   return (
-    <CartContext.Provider value={{ cart, cartCount, loading, addToCart, decreaseItem, removeItem, clearCart, refreshCart }}>
+    <CartContext.Provider value={{ cart, cartCount, total, addToCart, updateQty, decreaseItem, removeItem, clearCart }}>
       {children}
     </CartContext.Provider>
   )

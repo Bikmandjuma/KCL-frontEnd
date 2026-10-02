@@ -4,22 +4,29 @@ import { Link } from 'react-router-dom'
 import api from '../api/axios'
 import ProductCard from '../components/ProductCard'
 import Loader from '../components/Loader'
+import { useWishlist } from '../context/WishlistContext'
 
 export default function Wishlist() {
+  const { ids } = useWishlist()
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
 
-  const load = async () => {
-    setLoading(true)
-    try {
-      const { data } = await api.get('/users/wishlist')
-      setItems(data.wishlist || [])
-    } finally {
-      setLoading(false)
+  useEffect(() => {
+    let cancelled = false
+    const load = async () => {
+      setLoading(true)
+      try {
+        const results = await Promise.all(
+          ids.map((id) => api.get(`/products/${id}`).then((r) => r.data).catch(() => null))
+        )
+        if (!cancelled) setItems(results.filter(Boolean))
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
     }
-  }
-
-  useEffect(() => { load() }, [])
+    load()
+    return () => { cancelled = true }
+  }, [ids])
 
   return (
     <div className="container-app py-10">
@@ -30,9 +37,7 @@ export default function Wishlist() {
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
-          {items.map((p) => (
-            <ProductCard key={p._id} product={p} wishlist={items.map(i=>i._id)} onWishlistChange={load} />
-          ))}
+          {items.map((p) => <ProductCard key={p._id} product={p} />)}
         </div>
       )}
     </div>

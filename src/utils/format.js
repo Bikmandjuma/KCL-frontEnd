@@ -4,6 +4,9 @@ export const formatRWF = (amount = 0) =>
 export const formatDate = (d) =>
   new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
 
+export const formatDateTime = (d) =>
+  new Date(d).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+
 export const timeAgo = (d) => {
   const seconds = Math.floor((new Date() - new Date(d)) / 1000)
   const map = [

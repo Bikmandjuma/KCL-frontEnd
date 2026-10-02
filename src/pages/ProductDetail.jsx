@@ -4,20 +4,17 @@ import { Heart, ShoppingCart, Minus, Plus, ChevronLeft, PackageCheck, PackageX, 
 import api, { fileUrl } from '../api/axios'
 import { formatRWF } from '../utils/format'
 import Loader from '../components/Loader'
-import { useAuth } from '../context/AuthContext'
 import { useCart } from '../context/CartContext'
+import { useWishlist } from '../context/WishlistContext'
 import toast from 'react-hot-toast'
 
 export default function ProductDetail() {
   const { hash } = useParams()
-  const { user } = useAuth()
   const { addToCart } = useCart()
+  const { isSaved, toggle } = useWishlist()
   const [product, setProduct] = useState(null)
   const [loading, setLoading] = useState(true)
   const [qty, setQty] = useState(1)
-  const [liked, setLiked] = useState(false)
-  const [rating, setRating] = useState(0)
-  const [comment, setComment] = useState('')
   const [activeImg, setActiveImg] = useState(0)
 
   const load = async () => {
@@ -27,10 +24,6 @@ export default function ProductDetail() {
       setProduct(data)
       setQty(1)
       setActiveImg(0)
-      if (user) {
-        const w = await api.get('/users/wishlist')
-        setLiked((w.data.wishlist || []).some((p) => p._id === data._id))
-      }
     } catch {
       toast.error('Product not found')
     } finally {
@@ -38,13 +31,9 @@ export default function ProductDetail() {
     }
   }
 
-  useEffect(() => { load() }, [hash, user])
+  useEffect(() => { load() }, [hash])
 
-  const toggleWishlist = async () => {
-    if (!user) return toast.error('Sign in to save favourites')
-    setLiked((v) => !v)
-    await api.put('/products/wishlist', { productId: product._id })
-  }
+  const liked = product ? isSaved(product._id) : false
 
   const increaseQty = () => {
     if (qty >= product.quantity) {
@@ -52,19 +41,6 @@ export default function ProductDetail() {
       return
     }
     setQty((q) => q + 1)
-  }
-
-  const submitRating = async () => {
-    if (!user) return toast.error('Sign in to leave a review')
-    if (!rating) return toast.error('Please choose a star rating')
-    try {
-      await api.put('/products/rating', { star: rating, productId: product._id, comments: comment })
-      toast.success('Thanks for your review!')
-      setComment('')
-      load()
-    } catch {
-      toast.error('Could not submit review')
-    }
   }
 
   if (loading) return <Loader label="Loading machine details..." />
@@ -137,7 +113,7 @@ export default function ProductDetail() {
             >
               <ShoppingCart size={18} /> Add to Cart
             </button>
-            <button onClick={toggleWishlist} className={`btn-outline ${liked ? '!bg-red-500 !text-white !border-red-500' : ''}`}>
+            <button onClick={() => toggle(product._id)} className={`btn-outline ${liked ? '!bg-red-500 !text-white !border-red-500' : ''}`}>
               <Heart size={18} fill={liked ? 'currentColor' : 'none'} /> {liked ? 'Saved' : 'Wishlist'}
             </button>
           </div>
@@ -150,11 +126,13 @@ export default function ProductDetail() {
         </div>
       </div>
 
-      {/* Reviews */}
+      {/* Reviews - read-only, since leaving one needs identity and this
+          storefront has no customer accounts. Staff can moderate via the
+          admin panel if this ever needs to change. */}
       <div className="mt-16 max-w-2xl">
         <h3 className="font-display text-2xl font-bold text-espresso-900 mb-4">Reviews</h3>
-        <div className="space-y-3 mb-8">
-          {(product.ratings || []).length === 0 && <p className="text-espresso-400 text-sm">No reviews yet, be the first!</p>}
+        <div className="space-y-3">
+          {(product.ratings || []).length === 0 && <p className="text-espresso-400 text-sm">No reviews yet.</p>}
           {(product.ratings || []).map((r, i) => (
             <div key={i} className="card p-4">
               <div className="flex text-gold mb-1">
@@ -163,18 +141,6 @@ export default function ProductDetail() {
               <p className="text-sm text-espresso-600">{r.comments}</p>
             </div>
           ))}
-        </div>
-        <div className="card p-5">
-          <p className="label">Leave a review</p>
-          <div className="flex text-gold mb-3 gap-1">
-            {[1,2,3,4,5].map((n) => (
-              <button key={n} onClick={() => setRating(n)}>
-                <Star size={22} fill={n <= rating ? 'currentColor' : 'none'} />
-              </button>
-            ))}
-          </div>
-          <textarea className="input mb-3" rows={3} placeholder="Tell others what you think..." value={comment} onChange={(e) => setComment(e.target.value)} />
-          <button onClick={submitRating} className="btn-primary">Submit Review</button>
         </div>
       </div>
     </div>

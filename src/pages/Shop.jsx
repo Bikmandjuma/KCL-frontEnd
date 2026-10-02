@@ -4,10 +4,8 @@ import api from '../api/axios'
 import ProductCard from '../components/ProductCard'
 import Loader from '../components/Loader'
 import Pagination from '../components/Pagination'
-import { useAuth } from '../context/AuthContext'
 
 export default function Shop() {
-  const { user } = useAuth()
   const [products, setProducts] = useState({ items: [], total: 0, page: 1, pages: 1 })
   const [categories, setCategories] = useState([])
   const [category, setCategory] = useState('')
@@ -15,15 +13,6 @@ export default function Shop() {
   const [sort, setSort] = useState('newest')
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(true)
-  const [wishlist, setWishlist] = useState([])
-
-  const loadWishlist = async () => {
-    if (!user) return setWishlist([])
-    try {
-      const { data } = await api.get('/users/wishlist')
-      setWishlist((data.wishlist || []).map((p) => p._id))
-    } catch {}
-  }
 
   const load = async () => {
     setLoading(true)
@@ -40,8 +29,7 @@ export default function Shop() {
 
   useEffect(() => {
     api.get('/products/categories').then((r) => setCategories(r.data)).catch(() => {})
-    loadWishlist()
-  }, [user])
+  }, [])
 
   useEffect(() => {
     const t = setTimeout(load, 250)
@@ -99,7 +87,7 @@ export default function Shop() {
         <>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
             {sorted.map((p) => (
-              <ProductCard key={p._id} product={p} wishlist={wishlist} onWishlistChange={loadWishlist} />
+              <ProductCard key={p._id} product={p} />
             ))}
           </div>
           <Pagination page={products.page} pages={products.pages} onChange={setPage} />

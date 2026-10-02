@@ -20,14 +20,12 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center py-14 px-4 bg-cream-dark">
+    <div className="min-h-[80vh] flex items-center justify-center py-14 px-4 bg-gray-200">
       <div className="card w-full max-w-md p-8">
         <div className="flex flex-col items-center mb-6">
-          <span className="w-14 h-14 rounded-full bg-espresso-900 flex items-center justify-center text-gold mb-3">
-            <Coffee size={26} />
-          </span>
-          <h1 className="font-display text-2xl font-extrabold text-espresso-900">Welcome Back</h1>
-          <p className="text-espresso-400 text-sm mt-1">Sign in to Kigali Coffee Lab</p>
+          <img src="/logo.jpg" alt="Kigali Coffee Lab" className="w-14 h-14 rounded-full object-cover mb-3" />
+          <h1 className="font-display text-2xl font-extrabold text-espresso-900">Staff Login</h1>
+          <p className="text-espresso-400 text-sm mt-1">For Admin and Managers only</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -53,7 +51,7 @@ export default function Login() {
         </form>
 
         <p className="text-center text-sm text-espresso-500 mt-6">
-          Don't have an account? <Link to="/register" className="text-gold-dark font-semibold">Create one</Link>
+          Just here to order coffee, food, or a machine? <Link to="/" className="text-gold-dark font-semibold">No account needed, browse the menu</Link>
         </p>
       </div>
     </div>
